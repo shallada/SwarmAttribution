@@ -52,8 +52,9 @@ def EvaluateMask(mask, x, y, feature_weight=FeatureWeight):
 
 		pipeline.fit(x_train, y_train)
 		accuracy = pipeline.score(x_test, y_test)
-		fitness = accuracy - (feature_weight * mask_sum)
+		fitness = accuracy - (feature_weight * (mask_sum/len(mask)))
 
 		fold_fitness.append(fitness)
+
 	return np.mean(fold_fitness)
 

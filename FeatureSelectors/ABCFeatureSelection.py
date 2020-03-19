@@ -18,7 +18,7 @@ if len(sys.argv) != 2:
 #
 all_features_file_name = "../Concatenator/"+sys.argv[1]+"/AllFeatures.txt"
 ColonySize = 100
-NIters = 100
+NIters = 500
 MaxTrial = 100
 UseDiscrete = True
 MaskMin = 0.0
@@ -106,17 +106,20 @@ class ArtificialBee(object):
 class EmployeeBee(ArtificialBee):
 
 	def explore(self, max_trials):
+		#print("self trial = "+str(self.trial)+", max trial = "+str(max_trials))
 		if self.trial <= max_trials:
 			if UseDiscrete:
+				n_pos = self.pos.copy()
 				for i in range(len(self.pos)):
-					if np.random.random() < ChnageProb:
-						self.pos[i] = np.random.choice([0, 1])
+					if np.random.random() < ChangeProb:
+						n_pos[i] = np.random.choice([0, 1])
 			else:
 				component = np.random.choice(self.pos)
 				phi = np.random.uniform(low=-1, high=1, size=len(self.pos))
 				n_pos = self.pos + (self.pos - component) * phi
 				n_pos = self.evaluate_boundaries(n_pos)
 			n_fitness = self.obj_function.evaluate(n_pos)
+			#print("############ n_fitness = "+str(n_fitness))
 			self.update_bee(n_pos, n_fitness)
 
 	def get_fitness(self):
@@ -134,9 +137,10 @@ class OnLookerBee(ArtificialBee):
 	def __exploit(self, candidate, fitness, max_trials):
 		if self.trial <= max_trials:
 			if UseDiscrete:
+				n_pos = self.pos.copy()
 				for i in range(len(self.pos)):
-					if np.random.random() < ChnageProb:
-						self.pos[i] = np.random.choice([0, 1])
+					if np.random.random() < ChangeProb:
+						n_pos[i] = np.random.choice([0, 1])
 			else:
 				component = np.random.choice(self.pos)
 				phi = np.random.uniform(low=-1, high=1, size=len(self.pos))
@@ -178,6 +182,7 @@ class ArtificialBeeColony(object):
 		if not self.optimal_solution:
 			self.optimal_solution = deepcopy(n_optimal_solution)
 		else:
+			#print("n_opt = "+str(n_optimal_solution.fitness)+", opt = "+str(self.optimal_solution.fitness))
 			if n_optimal_solution.fitness < self.optimal_solution.fitness:
 				self.optimal_solution = deepcopy(n_optimal_solution)
 
@@ -192,22 +197,22 @@ class ArtificialBeeColony(object):
 			self.onlokeer_bees.append(OnLookerBee(self.obj_function))
 
 	def __employee_bees_phase(self):
-		map(lambda bee: bee.explore(self.max_trials), self.employee_bees)
+		_ = list(map(lambda bee: bee.explore(self.max_trials), self.employee_bees))
 
 	def __calculate_probabilities(self):
 		sum_fitness = sum(map(lambda bee: bee.get_fitness(), self.employee_bees))
-		map(lambda bee: bee.compute_prob(sum_fitness), self.employee_bees)
+		_ = list(map(lambda bee: bee.compute_prob(sum_fitness), self.employee_bees))
 
 	def __select_best_food_sources(self):
-		self.best_food_sources = filter(lambda bee: bee.prob > np.random.uniform(low=0, high=1), self.employee_bees)
+		self.best_food_sources = list(filter(lambda bee: bee.prob > np.random.uniform(low=0, high=1), self.employee_bees))
 		while not self.best_food_sources:
-			self.best_food_sources = filter(lambda bee: bee.prob > np.random.uniform(low=0, high=1), self.employee_bees)
+			self.best_food_sources = list(filter(lambda bee: bee.prob > np.random.uniform(low=0, high=1), self.employee_bees))
 
 	def __onlooker_bees_phase(self):
-		map(lambda bee: bee.onlook(self.best_food_sources, self.max_trials), self.onlokeer_bees)
+		_ = list(map(lambda bee: bee.onlook(self.best_food_sources, self.max_trials), self.onlokeer_bees))
 
 	def __scout_bees_phase(self):
-		map(lambda bee: bee.reset_bee(self.max_trials), self.onlokeer_bees + self.employee_bees)
+		_ = list(map(lambda bee: bee.reset_bee(self.max_trials), self.onlokeer_bees + self.employee_bees))
 
 	def optimize(self):
 		self.__reset_algorithm()
@@ -225,7 +230,8 @@ class ArtificialBeeColony(object):
 
 			self.__update_optimal_solution()
 			self.__update_optimality_tracking()
-			print("iter: {} = cost: {}".format(itr, "%04.03e" % self.optimal_solution.fitness))
+			if (itr % 10 == 0):
+				print("iter: {} = cost: {}".format(itr, "%04.03e" % self.optimal_solution.fitness))
 
 
 
