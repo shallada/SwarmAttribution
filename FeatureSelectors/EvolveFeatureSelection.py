@@ -1,11 +1,12 @@
 import csv
 import numpy as np
 import random
-import re
 import sys
-from sklearn import preprocessing
+
 
 from EvaluateMask import EvaluateMask
+from LoadFeatures import LoadFeatures
+
 
 if len(sys.argv) != 2:
 	print("include the dataset subfolder name as a parameter")
@@ -24,55 +25,7 @@ UseDiscrete = False
 MaskMin = 0.0
 MaskMax = 1.0
 
-def LoadFeatures(file_name):
 
-	X = []
-	Y = []
-	with open(file_name) as csv_file:
-		csv_reader = csv.reader(csv_file, delimiter=',')
-		for row in csv_reader:
-			y = re.split("_", row[0])[0]
-			Y.append(y)
-			x = [float(f) for f in row[1:]]
-			X.append(x)
-	Y = preprocessing.LabelEncoder().fit_transform(Y)
-	return np.array(X), np.array(Y)
-
-"""
-def EvaluateMask(mask, x, y):
-	kfold = StratifiedKFold(n_splits=4,shuffle=True,random_state=0)
-
-
-	#
-	# Adjust the pipeline to select the desired feature preprocessing, preprocessing order and
-	# Author attribution kernel.
-	#
-	# Note TF-IDF is not working - probably needs CountVectorizer
-	#
-	pipeline = Pipeline([
-		#('tfidf', TfidfTransformer()),
-		('standardizer', StandardScaler()),
-		('normalizer', Normalizer()),
-		('clf', OneVsRestClassifier(svm.SVC(kernel='linear'),n_jobs=-1))
-		#('clf', OneVsRestClassifier(svm.SVC(kernel='rbf', gamma='auto'),n_jobs=-1))
-		#('mlp', MLPClassifier(hidden_layer_sizes=(100), max_iter=10000, activation = 'relu', solver='adam'))
-	])
-
-	fold_accuracy = []
-	for train, test in StratifiedKFold(n_splits=4).split(x, y):
-		x_train = np.array(x[train]) * np.array(mask)
-		y_train = np.array(y[train])
-
-		x_test = np.array(x[test]) * np.array(mask)
-		y_test = np.array(y[test])
-
-
-		pipeline.fit(x_train, y_train)
-		accuracy = pipeline.score(x_test, y_test)
-
-		fold_accuracy.append(accuracy)
-	return np.mean(fold_accuracy)
-"""
 
 def EvaluatePopulation(population, x, y):
 	for i in range(len(population)):

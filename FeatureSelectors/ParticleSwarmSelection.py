@@ -1,12 +1,9 @@
-import csv
 import numpy as np
 import pyswarms as ps
-import re
 import sys
-from sklearn import preprocessing
 
 from EvaluateMask import EvaluateMask
-
+from LoadFeatures import LoadFeatures
 
 if len(sys.argv) != 2:
 	print("include the dataset subfolder name as a parameter")
@@ -22,20 +19,6 @@ NParents = 2
 NSplits = 4
 UseDiscrete = False
 NeighborRatio = .3
-
-def LoadFeatures(file_name):
-
-	X = []
-	Y = []
-	with open(file_name) as csv_file:
-		csv_reader = csv.reader(csv_file, delimiter=',')
-		for row in csv_reader:
-			y = re.split("_", row[0])[0]
-			Y.append(y)
-			x = [float(f) for f in row[1:]]
-			X.append(x)
-	Y = preprocessing.LabelEncoder().fit_transform(Y)
-	return np.array(X), np.array(Y)
 
 
 

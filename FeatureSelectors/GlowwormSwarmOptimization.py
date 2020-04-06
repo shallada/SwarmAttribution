@@ -1,14 +1,12 @@
-import csv
 import math
 import numpy as np
 import pyswarms as ps
 import random
-import re
 import sys
 from scipy.spatial import distance as dist
-from sklearn import preprocessing
 
 from EvaluateMask import EvaluateMask
+from LoadFeatures import LoadFeatures
 
 if len(sys.argv) != 2:
 	print("include the dataset subfolder name as a parameter")
@@ -17,25 +15,11 @@ if len(sys.argv) != 2:
 all_features_file_name = "../Concatenator/"+sys.argv[1]+"/AllFeatures.txt"
 NIter = 100
 PopSize = 10
-UseDiscrete = False
+UseDiscrete = True
 DecayRate = 0.1
 FitnessWeight = 0.7
 StepSize = 2.0
 
-
-def LoadFeatures(file_name):
-
-	X = []
-	Y = []
-	with open(file_name) as csv_file:
-		csv_reader = csv.reader(csv_file, delimiter=',')
-		for row in csv_reader:
-			y = re.split("_", row[0])[0]
-			Y.append(y)
-			x = [float(f) for f in row[1:]]
-			X.append(x)
-	Y = preprocessing.LabelEncoder().fit_transform(Y)
-	return np.array(X), np.array(Y)
 
 class Worm:
 	def __init__(self, n_dim):

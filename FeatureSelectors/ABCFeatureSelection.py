@@ -1,13 +1,11 @@
-import csv
 import numpy as np
 import random
-import re
 import sys
 from copy import deepcopy
 from scipy import optimize
-from sklearn import preprocessing
 
 from EvaluateMask import EvaluateMask
+from LoadFeatures import LoadFeatures
 
 if len(sys.argv) != 2:
 	print("include the dataset subfolder name as a parameter")
@@ -232,23 +230,6 @@ class ArtificialBeeColony(object):
 			self.__update_optimality_tracking()
 			if (itr % 10 == 0):
 				print("iter: {} = cost: {}".format(itr, "%04.03e" % self.optimal_solution.fitness))
-
-
-
-
-def LoadFeatures(file_name):
-
-	X = []
-	Y = []
-	with open(file_name) as csv_file:
-		csv_reader = csv.reader(csv_file, delimiter=',')
-		for row in csv_reader:
-			y = re.split("_", row[0])[0]
-			Y.append(y)
-			x = [float(f) for f in row[1:]]
-			X.append(x)
-	Y = preprocessing.LabelEncoder().fit_transform(Y)
-	return np.array(X), np.array(Y)
 
 
 def ColonyMask(x, y, colony_size, n_iters):
