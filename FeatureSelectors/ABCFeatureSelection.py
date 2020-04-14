@@ -16,12 +16,14 @@ if len(sys.argv) != 2:
 #
 all_features_file_name = "../Concatenator/"+sys.argv[1]+"/AllFeatures.txt"
 ColonySize = 100
-NIters = 500
-MaxTrial = 100
+NIters = 150
+MaxTrial = 10
 UseDiscrete = True
 MaskMin = 0.0
 MaskMax = 1.0
-ChangeProb = 0.1 # probability of changing a bit when exploring
+ChangeProb = 0.02 # probability of changing a bit when exploring
+NRuns = 30
+FeatureWeight = 0.0
 
 
 class ObjectiveFunction(object):
@@ -44,7 +46,8 @@ class ObjectiveFunction(object):
 		"""
 		return np.repeat(self.minf, repeats=self.dim) \
 			   + np.random.uniform(low=0, high=1, size=self.dim) *\
-			   np.repeat(self.maxf - self.minf, repeats=self.dim)"""
+			   np.repeat(self.maxf - self.minf, repeats=self.dim)
+		"""
 		return mask
 
 
@@ -60,7 +63,8 @@ class MaskEvaluator(ObjectiveFunction):
 		self.y = y
 
 	def evaluate(self, mask):
-		return EvaluateMask(mask, self.x, self.y)
+		inc_count()
+		return EvaluateMask(mask, self.x, self.y, feature_weight = FeatureWeight)
 
 class ArtificialBee(object):
 
@@ -83,7 +87,7 @@ class ArtificialBee(object):
 		return pos
 
 	def update_bee(self, pos, fitness):
-		if fitness <= self.fitness:
+		if fitness > self.fitness:
 			self.pos = pos
 			self.fitness = fitness
 			self.trial = 0
@@ -176,12 +180,12 @@ class ArtificialBeeColony(object):
 		self.optimality_tracking.append(self.optimal_solution.fitness)
 
 	def __update_optimal_solution(self):
-		n_optimal_solution = min(self.onlokeer_bees + self.employee_bees, key=lambda bee: bee.fitness)
+		n_optimal_solution = max(self.onlokeer_bees + self.employee_bees, key=lambda bee: bee.fitness)
 		if not self.optimal_solution:
 			self.optimal_solution = deepcopy(n_optimal_solution)
 		else:
 			#print("n_opt = "+str(n_optimal_solution.fitness)+", opt = "+str(self.optimal_solution.fitness))
-			if n_optimal_solution.fitness < self.optimal_solution.fitness:
+			if n_optimal_solution.fitness > self.optimal_solution.fitness:
 				self.optimal_solution = deepcopy(n_optimal_solution)
 
 	def __initialize_employees(self):
@@ -229,7 +233,7 @@ class ArtificialBeeColony(object):
 			self.__update_optimal_solution()
 			self.__update_optimality_tracking()
 			if (itr % 10 == 0):
-				print("iter: {} = cost: {}".format(itr, "%04.03e" % self.optimal_solution.fitness))
+				print("iter: {}: accuracy = {}".format(itr, "%04.03e" % self.optimal_solution.fitness))
 
 
 def ColonyMask(x, y, colony_size, n_iters):
@@ -240,6 +244,13 @@ def ColonyMask(x, y, colony_size, n_iters):
 
 
 x, y = LoadFeatures(all_features_file_name)
-mask = ColonyMask(x, y, ColonySize, NIters)
-accuracy = EvaluateMask(mask, x, y, feature_weight=0)
-print("accuracy = "+str(accuracy))
+
+
+for fw in [0.0, 0.1, 0.3, 0.5, 0.7, 0.9, 1.0]:
+	for n in range(NRuns):
+		FeatureWeight = fw
+		mask = ColonyMask(x, y, ColonySize, NIters)
+
+
+		accuracy = EvaluateMask(mask, x, y, feature_weight=0)
+		print(str(n)+": Feature Weight = "+str(fw)+", accuracy = "+str(accuracy))

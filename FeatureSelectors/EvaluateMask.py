@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import sparse
 from sklearn import svm
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.model_selection import StratifiedKFold
@@ -8,7 +9,15 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, Normalizer
 
 
-FeatureWeight = 0.5
+FeatureWeight = 0.0
+
+def CalculateTF_IDF(matrix):
+	matrix = sparse.csr_matrix(matrix)
+	tfidf_transformer = TfidfTransformer(smooth_idf=True,use_idf=True)
+	tfidf_transformer.fit(matrix)
+	matrix = tfidf_transformer.transform(matrix)
+	matrix = matrix.todense()
+	return matrix
 
 
 def EvaluateMask(mask, x, y, feature_weight=FeatureWeight):
@@ -23,7 +32,6 @@ def EvaluateMask(mask, x, y, feature_weight=FeatureWeight):
 	# Note TF-IDF is not working - probably needs CountVectorizer
 	#
 	pipeline = Pipeline([
-		#('tfidf', TfidfTransformer()),
 		('standardizer', StandardScaler()),
 		('normalizer', Normalizer()),
 
@@ -49,6 +57,8 @@ def EvaluateMask(mask, x, y, feature_weight=FeatureWeight):
 		x_test = np.array(x[test]) * mask_array
 		y_test = np.array(y[test])
 
+		x_train = CalculateTF_IDF(x_train)
+		x_test = CalculateTF_IDF(x_test)
 
 		pipeline.fit(x_train, y_train)
 		accuracy = pipeline.score(x_test, y_test)

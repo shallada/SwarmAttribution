@@ -51,7 +51,7 @@ def EvaluatePopulation(ants, buckets, x, y):
 	for i in range(len(ants)):
 		mask = AntToMask(ants[i], buckets)
 
-		fitness = EvaluateMask(mask, x, y, feature_weight=0)
+		fitness = EvaluateMask(mask, x, y)
 		fit.append(fitness)
 
 	return list(fit)
@@ -140,7 +140,7 @@ def BestAntMask(x, y):
 		ApplyDecay(buckets)
 		ApplyPheromones(buckets, ants, fit)
 
-		accuracy = EvaluateMask(DeriveMask(buckets), x, y, feature_weight=0)
+		accuracy = EvaluateMask(DeriveMask(buckets), x, y)
 		print("accuracy = "+str(accuracy))
 
 

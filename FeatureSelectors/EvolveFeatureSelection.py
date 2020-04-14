@@ -16,20 +16,22 @@ if len(sys.argv) != 2:
 # Parameters
 #
 all_features_file_name = "../Concatenator/"+sys.argv[1]+"/AllFeatures.txt"
-NGen = 10000
-PopSize = 10
-MutationRate = .3
+NGen = 150
+PopSize = 100
+MutationRate = .02
 NParents = 2
 NSplits = 4
-UseDiscrete = False
+UseDiscrete = True
 MaskMin = 0.0
 MaskMax = 1.0
+NRuns = 30
+FeatureWeight = 0.0
 
 
 
 def EvaluatePopulation(population, x, y):
 	for i in range(len(population)):
-		population[i][1] = EvaluateMask(population[i][0], x, y)
+		population[i][1] = EvaluateMask(population[i][0], x, y, feature_weight = FeatureWeight)
 		
 
 def CreatePopulation(pop_size, mask_size):
@@ -77,11 +79,11 @@ def EvolveMasks(x, y, pop_size=PopSize, n_gen=NGen, mutation_rate=MutationRate, 
 	EvaluatePopulation(population, x, y)
 	population.sort(key = lambda x: x[1], reverse=True)
 
-	for _ in range(n_gen):
+	for n in range(n_gen):
 		parents = ChooseParents(population, n_parents)
 		child_mask = UniformCrossover(parents, mutation_rate)
 
-		accuracy = EvaluateMask(child_mask, x, y)
+		accuracy = EvaluateMask(child_mask, x, y, feature_weight = FeatureWeight)
 		#print('child acc = '+str(accuracy))
 		# if the new child is better than the worst of the population,
 		if accuracy > population[-1][1]:
@@ -91,13 +93,17 @@ def EvolveMasks(x, y, pop_size=PopSize, n_gen=NGen, mutation_rate=MutationRate, 
 
 		best = population[0][1]
 		mean = CalcMean(population)
-		print("best = "+str(best)+", mean = "+str(mean)+", worst = "+str(population[-1][1]))
-	return fitness, population[0][0]
+		#print(str(n)+": best = "+str(best)+", mean = "+str(mean)+", worst = "+str(population[-1][1]))
+	return best, population[0][0]
 
 x, y = LoadFeatures(all_features_file_name)
-fitness, mask = EvolveMasks(x, y)
+for fw in [0.0, 0.1, 0.3, 0.5, 0.7, 0.9, 1.0]:
 
-accuracy = EvaluateMask(mask, x, y, feature_weight=0)
-print("accuracy = "+str(accuracy))
+	for n in range(NRuns):
+		FeatureWeight = fw
+		fitness, mask = EvolveMasks(x, y)
+
+		accuracy = EvaluateMask(mask, x, y, feature_weight=0)
+		print(str(n)+": Feature Weight = "+str(fw)+", fitness = "+str(fitness)+", accuracy = "+str(accuracy))
 
 
