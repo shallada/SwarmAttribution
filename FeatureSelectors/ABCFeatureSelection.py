@@ -63,7 +63,6 @@ class MaskEvaluator(ObjectiveFunction):
 		self.y = y
 
 	def evaluate(self, mask):
-		inc_count()
 		return EvaluateMask(mask, self.x, self.y, feature_weight = FeatureWeight)
 
 class ArtificialBee(object):
