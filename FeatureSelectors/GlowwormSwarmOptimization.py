@@ -5,6 +5,7 @@ import random
 import sys
 from scipy.spatial import distance as dist
 
+
 from EvaluateMask import EvaluateMask
 from LoadFeatures import LoadFeatures
 
