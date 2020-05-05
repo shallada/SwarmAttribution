@@ -12,20 +12,22 @@ if len(sys.argv) != 2:
 
 
 all_features_file_name = "../Concatenator/"+sys.argv[1]+"/AllFeatures.txt"
-NGen = 1000
+NGen = 50
 PopSize = 10
 MutationRate = .1
 NParents = 2
 NSplits = 4
 UseDiscrete = False
 NeighborRatio = .3
+NRuns = 30
+FeatureWeight = 0.0
 
 
 
 def EvaluatePopulation(masks, x, y):
 	fit = []
 	for i in range(len(masks)):
-		fit.append(EvaluateMask(masks[i], x, y))
+		fit.append(EvaluateMask(masks[i], x, y, feature_weight = FeatureWeight))
 	return fit
 
 
@@ -51,9 +53,12 @@ def SwarmMask(x, y):
 
 
 x, y = LoadFeatures(all_features_file_name)
-mask = SwarmMask(x, y)
 
-accuracy = EvaluateMask(mask, x, y, feature_weight=0)
-print("accuracy = "+str(accuracy))
+for fw in [0.0, 0.1, 0.3, 0.5, 0.7, 0.9, 1.0]:
+	for n in range(NRuns):
+		FeatureWeight = fw
+		mask = SwarmMask(x, y)
 
+		accuracy = EvaluateMask(mask, x, y, feature_weight=0)
+		print(str(n)+": Feature Weight = "+str(fw)+", accuracy = "+str(accuracy), flush = True)
 

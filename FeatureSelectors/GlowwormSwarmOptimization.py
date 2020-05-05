@@ -13,13 +13,14 @@ if len(sys.argv) != 2:
 	exit()
 
 all_features_file_name = "../Concatenator/"+sys.argv[1]+"/AllFeatures.txt"
-NIter = 100
+NIter = 50
 PopSize = 10
 UseDiscrete = True
 DecayRate = 0.1
 FitnessWeight = 0.7
 StepSize = 2.0
-
+NRuns = 30
+FeatureWeight = 0.0
 
 class Worm:
 	def __init__(self, n_dim):
@@ -33,7 +34,7 @@ class Worm:
 			mask = [0 if _ < 0.5 else 1 for _ in self.location]
 		else:
 			mask = self.location
-		self.luciferin = (self.luciferin * (1.0 - DecayRate)) + (FitnessWeight * EvaluateMask(mask, x, y))
+		self.luciferin = (self.luciferin * (1.0 - DecayRate)) + (FitnessWeight * EvaluateMask(mask, x, y, feature_weight = FeatureWeight))
 
 	def update_position(self, other):
 		delta = np.array(other.location) - np.array(self.location)
@@ -79,7 +80,7 @@ def UpdateSensorRadius(pop):
 	pass
 
 def BestFit(pop, x, y):
-	return max(pop, key=lambda worm: EvaluateMask(worm.location, x, y))
+	return max(pop, key=lambda worm: EvaluateMask(worm.location, x, y, feature_weight = FeatureWeight))
 
 def SwarmMask(x, y):
 
@@ -88,7 +89,7 @@ def SwarmMask(x, y):
 
 	pop = CreatePopulation(PopSize, len(x[0]))
 	for _ in range(NIter):
-		print('loop = '+str(_))
+		#print('loop = '+str(_))
 		UpdateLuciferinLevels(pop, x, y)
 		UpdatePositions(pop)
 		UpdateSensorRadius(pop)
@@ -96,12 +97,12 @@ def SwarmMask(x, y):
 	return BestFit(pop, x, y).location
 
 x, y = LoadFeatures(all_features_file_name)
-mask = SwarmMask(x, y)
 
-if UseDiscrete:
-	mask = [0 if _ < 0.5 else 1 for _ in mask]
+for fw in [0.0, 0.1, 0.3, 0.5, 0.7, 0.9, 1.0]:
+	for n in range(NRuns):
+		FeatureWeight = fw
+		mask = SwarmMask(x, y)
 
-print(mask)
+		accuracy = EvaluateMask(mask, x, y, feature_weight=0)
+		print(str(n)+": Feature Weight = "+str(fw)+", accuracy = "+str(accuracy), flush = True)
 
-accuracy = EvaluateMask(mask, x, y, feature_weight=0)
-print("accuracy = "+str(accuracy))

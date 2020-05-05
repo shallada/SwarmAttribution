@@ -12,13 +12,15 @@ if len(sys.argv) != 2:
 	exit()
 
 all_features_file_name = "../Concatenator/"+sys.argv[1]+"/AllFeatures.txt"
-NIter = 1000
+NIter = 50
 PopSize = 10
 UseDiscrete = True
 DecayRate = 0.1
 NBuckets = 100
 BucketRadius = 3
 FitScale = 1.0
+NRuns = 30
+FeatureWeight = 0.0
 if UseDiscrete:
 	NBuckets = 2
 	BucketRadius = 0
@@ -51,7 +53,7 @@ def EvaluatePopulation(ants, buckets, x, y):
 	for i in range(len(ants)):
 		mask = AntToMask(ants[i], buckets)
 
-		fitness = EvaluateMask(mask, x, y)
+		fitness = EvaluateMask(mask, x, y, feature_weight = FeatureWeight)
 		fit.append(fitness)
 
 	return list(fit)
@@ -140,19 +142,22 @@ def BestAntMask(x, y):
 		ApplyDecay(buckets)
 		ApplyPheromones(buckets, ants, fit)
 
-		accuracy = EvaluateMask(DeriveMask(buckets), x, y)
-		print("accuracy = "+str(accuracy))
+		accuracy = EvaluateMask(DeriveMask(buckets), x, y, feature_weight = FeatureWeight)
+		#print("accuracy = "+str(accuracy))
 
 
 	return DeriveMask(buckets)
 
 x, y = LoadFeatures(all_features_file_name)
 
-mask = BestAntMask(x, y)
+for fw in [0.0, 0.1, 0.3, 0.5, 0.7, 0.9, 1.0]:
+	for n in range(NRuns):
+		FeatureWeight = fw
+		mask = BestAntMask(x, y)
 
-#print(mask)
 
-accuracy = EvaluateMask(mask, x, y, feature_weight=0)
-print("accuracy = "+str(accuracy))
+		accuracy = EvaluateMask(mask, x, y, feature_weight=0)
+		print(str(n)+": Feature Weight = "+str(fw)+", accuracy = "+str(accuracy), flush = True)
+
 
 

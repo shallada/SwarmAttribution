@@ -16,7 +16,7 @@ if len(sys.argv) != 2:
 # Parameters
 #
 all_features_file_name = "../Concatenator/"+sys.argv[1]+"/AllFeatures.txt"
-NGen = 150
+NGen = 400
 PopSize = 100
 MutationRate = .02
 NParents = 2
@@ -104,6 +104,6 @@ for fw in [0.0, 0.1, 0.3, 0.5, 0.7, 0.9, 1.0]:
 		fitness, mask = EvolveMasks(x, y)
 
 		accuracy = EvaluateMask(mask, x, y, feature_weight=0)
-		print(str(n)+": Feature Weight = "+str(fw)+", fitness = "+str(fitness)+", accuracy = "+str(accuracy))
+		print(str(n)+": Feature Weight = "+str(fw)+", fitness = "+str(fitness)+", accuracy = "+str(accuracy), flush = True)
 
 

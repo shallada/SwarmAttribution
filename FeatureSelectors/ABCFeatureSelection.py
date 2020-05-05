@@ -15,8 +15,8 @@ if len(sys.argv) != 2:
 # Parameters
 #
 all_features_file_name = "../Concatenator/"+sys.argv[1]+"/AllFeatures.txt"
-ColonySize = 100
-NIters = 150
+ColonySize = 10
+NIters = 50
 MaxTrial = 10
 UseDiscrete = True
 MaskMin = 0.0
@@ -63,7 +63,6 @@ class MaskEvaluator(ObjectiveFunction):
 		self.y = y
 
 	def evaluate(self, mask):
-		inc_count()
 		return EvaluateMask(mask, self.x, self.y, feature_weight = FeatureWeight)
 
 class ArtificialBee(object):
@@ -232,8 +231,8 @@ class ArtificialBeeColony(object):
 
 			self.__update_optimal_solution()
 			self.__update_optimality_tracking()
-			if (itr % 10 == 0):
-				print("iter: {}: accuracy = {}".format(itr, "%04.03e" % self.optimal_solution.fitness))
+			#if (itr % 10 == 0):
+				#print("iter: {}: accuracy = {}".format(itr, "%04.03e" % self.optimal_solution.fitness))
 
 
 def ColonyMask(x, y, colony_size, n_iters):
@@ -253,4 +252,4 @@ for fw in [0.0, 0.1, 0.3, 0.5, 0.7, 0.9, 1.0]:
 
 
 		accuracy = EvaluateMask(mask, x, y, feature_weight=0)
-		print(str(n)+": Feature Weight = "+str(fw)+", accuracy = "+str(accuracy))
+		print(str(n)+": Feature Weight = "+str(fw)+", accuracy = "+str(accuracy), flush = True)
