@@ -9,6 +9,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, Normalizer
 
 
+
 FeatureWeight = 0.0
 
 def CalculateTF_IDF(matrix):

@@ -4,25 +4,32 @@ import sys
 from copy import deepcopy
 from scipy import optimize
 
+
 from EvaluateMask import EvaluateMask
 from LoadFeatures import LoadFeatures
 
-if len(sys.argv) != 2:
-	print("include the dataset subfolder name as a parameter")
+if len(sys.argv) != 4:
+	print("Missing parameters")
+	print("FORMAT: algorithm data_set ones_ratio run")
 	exit()
+
+algorithm = sys.argv[0].split(".")[0]
+data_set = sys.argv[1]
+ones_ratio = float(sys.argv[2])
+run_no = int(sys.argv[3])
+all_features_file_name = "../Concatenator/"+data_set+"/AllFeatures.txt"
+out_file_name = "output/"+algorithm+"-"+data_set+"-"+str(ones_ratio)+"-"+str(run_no)
 
 #
 # Parameters
 #
-all_features_file_name = "../Concatenator/"+sys.argv[1]+"/AllFeatures.txt"
-ColonySize = 100
+ColonySize = 10
 NIters = 150
 MaxTrial = 10
 UseDiscrete = True
 MaskMin = 0.0
 MaskMax = 1.0
 ChangeProb = 0.02 # probability of changing a bit when exploring
-NRuns = 30
 FeatureWeight = 0.0
 
 
@@ -231,8 +238,8 @@ class ArtificialBeeColony(object):
 
 			self.__update_optimal_solution()
 			self.__update_optimality_tracking()
-			if (itr % 10 == 0):
-				print("iter: {}: accuracy = {}".format(itr, "%04.03e" % self.optimal_solution.fitness))
+			#if (itr % 10 == 0):
+				#print("iter: {}: accuracy = {}".format(itr, "%04.03e" % self.optimal_solution.fitness))
 
 
 def ColonyMask(x, y, colony_size, n_iters):
@@ -244,12 +251,10 @@ def ColonyMask(x, y, colony_size, n_iters):
 
 x, y = LoadFeatures(all_features_file_name)
 
-
-for fw in [0.0, 0.1, 0.3, 0.5, 0.7, 0.9, 1.0]:
-	for n in range(NRuns):
-		FeatureWeight = fw
-		mask = ColonyMask(x, y, ColonySize, NIters)
+FeatureWeight = ones_ratio
+mask = ColonyMask(x, y, ColonySize, NIters)
+accuracy = EvaluateMask(mask, x, y, feature_weight=0)
 
 
-		accuracy = EvaluateMask(mask, x, y, feature_weight=0)
-		print(str(n)+": Feature Weight = "+str(fw)+", accuracy = "+str(accuracy))
+with open(out_file_name, 'w') as out_file:
+	out_file.write(str(accuracy)+","+str(mask)+"\n")

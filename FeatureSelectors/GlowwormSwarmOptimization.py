@@ -5,21 +5,30 @@ import random
 import sys
 from scipy.spatial import distance as dist
 
+
 from EvaluateMask import EvaluateMask
 from LoadFeatures import LoadFeatures
 
-if len(sys.argv) != 2:
-	print("include the dataset subfolder name as a parameter")
+
+if len(sys.argv) != 4:
+	print("Missing parameters")
+	print("FORMAT: algorithm data_set ones_ratio run")
 	exit()
 
-all_features_file_name = "../Concatenator/"+sys.argv[1]+"/AllFeatures.txt"
-NIter = 100
+algorithm = sys.argv[0].split(".")[0]
+data_set = sys.argv[1]
+ones_ratio = float(sys.argv[2])
+run_no = int(sys.argv[3])
+all_features_file_name = "../Concatenator/"+data_set+"/AllFeatures.txt"
+out_file_name = "output/"+algorithm+"-"+data_set+"-"+str(ones_ratio)+"-"+str(run_no)
+
+NIter = 150
 PopSize = 10
 UseDiscrete = True
 DecayRate = 0.1
 FitnessWeight = 0.7
 StepSize = 2.0
-
+FeatureWeight = 0.0
 
 class Worm:
 	def __init__(self, n_dim):
@@ -33,7 +42,7 @@ class Worm:
 			mask = [0 if _ < 0.5 else 1 for _ in self.location]
 		else:
 			mask = self.location
-		self.luciferin = (self.luciferin * (1.0 - DecayRate)) + (FitnessWeight * EvaluateMask(mask, x, y))
+		self.luciferin = (self.luciferin * (1.0 - DecayRate)) + (FitnessWeight * EvaluateMask(mask, x, y, feature_weight = FeatureWeight))
 
 	def update_position(self, other):
 		delta = np.array(other.location) - np.array(self.location)
@@ -79,7 +88,7 @@ def UpdateSensorRadius(pop):
 	pass
 
 def BestFit(pop, x, y):
-	return max(pop, key=lambda worm: EvaluateMask(worm.location, x, y))
+	return max(pop, key=lambda worm: EvaluateMask(worm.location, x, y, feature_weight = FeatureWeight))
 
 def SwarmMask(x, y):
 
@@ -88,20 +97,24 @@ def SwarmMask(x, y):
 
 	pop = CreatePopulation(PopSize, len(x[0]))
 	for _ in range(NIter):
-		print('loop = '+str(_))
+		#print('loop = '+str(_))
 		UpdateLuciferinLevels(pop, x, y)
 		UpdatePositions(pop)
 		UpdateSensorRadius(pop)
 
-	return BestFit(pop, x, y).location
+	loc = BestFit(pop, x, y).location
+	if UseDiscrete:
+		mask = [0 if _ < 0.5 else 1 for _ in loc]
+	else:
+		mask = loc
+	return mask
 
 x, y = LoadFeatures(all_features_file_name)
+
+FeatureWeight = ones_ratio
 mask = SwarmMask(x, y)
 
-if UseDiscrete:
-	mask = [0 if _ < 0.5 else 1 for _ in mask]
-
-print(mask)
-
 accuracy = EvaluateMask(mask, x, y, feature_weight=0)
-print("accuracy = "+str(accuracy))
+
+with open(out_file_name, 'w') as out_file:
+	out_file.write(str(accuracy)+","+str(mask)+"\n")

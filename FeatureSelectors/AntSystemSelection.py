@@ -4,21 +4,30 @@ import random
 import sys
 
 
+
 from EvaluateMask import EvaluateMask
 from LoadFeatures import LoadFeatures
 
-if len(sys.argv) != 2:
-	print("include the dataset subfolder name as a parameter")
+if len(sys.argv) != 4:
+	print("Missing parameters")
+	print("FORMAT: algorithm data_set ones_ratio run")
 	exit()
 
-all_features_file_name = "../Concatenator/"+sys.argv[1]+"/AllFeatures.txt"
-NIter = 1000
+algorithm = sys.argv[0].split(".")[0]
+data_set = sys.argv[1]
+ones_ratio = float(sys.argv[2])
+run_no = int(sys.argv[3])
+all_features_file_name = "../Concatenator/"+data_set+"/AllFeatures.txt"
+out_file_name = "output/"+algorithm+"-"+data_set+"-"+str(ones_ratio)+"-"+str(run_no)
+
+NIter = 150
 PopSize = 10
 UseDiscrete = True
 DecayRate = 0.1
 NBuckets = 100
 BucketRadius = 3
 FitScale = 1.0
+FeatureWeight = 0.0
 if UseDiscrete:
 	NBuckets = 2
 	BucketRadius = 0
@@ -51,7 +60,7 @@ def EvaluatePopulation(ants, buckets, x, y):
 	for i in range(len(ants)):
 		mask = AntToMask(ants[i], buckets)
 
-		fitness = EvaluateMask(mask, x, y)
+		fitness = EvaluateMask(mask, x, y, feature_weight = FeatureWeight)
 		fit.append(fitness)
 
 	return list(fit)
@@ -140,19 +149,20 @@ def BestAntMask(x, y):
 		ApplyDecay(buckets)
 		ApplyPheromones(buckets, ants, fit)
 
-		accuracy = EvaluateMask(DeriveMask(buckets), x, y)
-		print("accuracy = "+str(accuracy))
+		accuracy = EvaluateMask(DeriveMask(buckets), x, y, feature_weight = FeatureWeight)
+		#print("accuracy = "+str(accuracy))
 
 
 	return DeriveMask(buckets)
 
 x, y = LoadFeatures(all_features_file_name)
 
+FeatureWeight = ones_ratio
 mask = BestAntMask(x, y)
 
-#print(mask)
-
 accuracy = EvaluateMask(mask, x, y, feature_weight=0)
-print("accuracy = "+str(accuracy))
+
+with open(out_file_name, 'w') as out_file:
+	out_file.write(str(accuracy)+","+str(mask)+"\n")
 
 
