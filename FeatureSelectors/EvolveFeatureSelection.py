@@ -9,15 +9,22 @@ from EvaluateMask import EvaluateMask
 from LoadFeatures import LoadFeatures
 
 
-if len(sys.argv) != 2:
-	print("include the dataset subfolder name as a parameter")
+if len(sys.argv) != 4:
+	print("Missing parameters")
+	print("FORMAT: algorithm data_set ones_ratio run")
 	exit()
+
+algorithm = sys.argv[0].split(".")[0]
+data_set = sys.argv[1]
+ones_ratio = float(sys.argv[2])
+run_no = int(sys.argv[3])
+all_features_file_name = "../Concatenator/"+data_set+"/AllFeatures.txt"
+out_file_name = "output/"+algorithm+"-"+data_set+"-"+str(ones_ratio)+"-"+str(run_no)
 
 #
 # Parameters
 #
-all_features_file_name = "../Concatenator/"+sys.argv[1]+"/AllFeatures.txt"
-NGen = 400
+NGen = 1400
 PopSize = 100
 MutationRate = .02
 NParents = 2
@@ -25,7 +32,6 @@ NSplits = 4
 UseDiscrete = True
 MaskMin = 0.0
 MaskMax = 1.0
-NRuns = 30
 FeatureWeight = 0.0
 
 
@@ -98,13 +104,11 @@ def EvolveMasks(x, y, pop_size=PopSize, n_gen=NGen, mutation_rate=MutationRate, 
 	return best, population[0][0]
 
 x, y = LoadFeatures(all_features_file_name)
-for fw in [0.0, 0.1, 0.3, 0.5, 0.7, 0.9, 1.0]:
 
-	for n in range(NRuns):
-		FeatureWeight = fw
-		fitness, mask = EvolveMasks(x, y)
+FeatureWeight = ones_ratio
+fitness, mask = EvolveMasks(x, y)
 
-		accuracy = EvaluateMask(mask, x, y, feature_weight=0)
-		print(str(n)+": Feature Weight = "+str(fw)+", fitness = "+str(fitness)+", accuracy = "+str(accuracy), flush = True)
+accuracy = EvaluateMask(mask, x, y, feature_weight=0)
 
-
+with open(out_file_name, 'w') as out_file:
+	out_file.write(str(accuracy)+","+str(mask)+"\n")
