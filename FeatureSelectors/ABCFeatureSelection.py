@@ -23,8 +23,8 @@ out_file_name = "output/"+algorithm+"-"+data_set+"-"+str(ones_ratio)+"-"+str(run
 #
 # Parameters
 #
-ColonySize = 10
-NIters = 150
+ColonySize = 30
+NIters = 500
 MaxTrial = 10
 UseDiscrete = True
 MaskMin = 0.0
