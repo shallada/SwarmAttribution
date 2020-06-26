@@ -22,8 +22,8 @@ run_no = int(sys.argv[3])
 all_features_file_name = "../Concatenator/"+data_set+"/AllFeatures.txt"
 out_file_name = "output/"+algorithm+"-"+data_set+"-"+str(ones_ratio)+"-"+str(run_no)
 
-NIter = 150
-PopSize = 10
+NIter = 500
+PopSize = 30
 UseDiscrete = True
 DecayRate = 0.1
 FitnessWeight = 0.7

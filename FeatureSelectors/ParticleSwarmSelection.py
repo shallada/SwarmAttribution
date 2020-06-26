@@ -18,9 +18,8 @@ run_no = int(sys.argv[3])
 all_features_file_name = "../Concatenator/"+data_set+"/AllFeatures.txt"
 out_file_name = "output/"+algorithm+"-"+data_set+"-"+str(ones_ratio)+"-"+str(run_no)
 
-NGen = 150
-PopSize = 10
-MutationRate = .1
+NGen = 500
+PopSize = 30
 NParents = 2
 NSplits = 4
 UseDiscrete = True
@@ -54,8 +53,9 @@ def SwarmMask(x, y):
 		optimizer = ps.single.GlobalBestPSO(n_particles=PopSize, dimensions=len(x[0]), options=options)
 	"""
 
-	options = {'c1': 0.5, 'c2': 0.3, 'w':0.9}
-	optimizer = ps.single.GlobalBestPSO(n_particles=PopSize, dimensions=len(x[0]), options=options)
+	options = {'c1': 2.8, 'c2': 1.3, 'w':0.9}
+	bounds = (np.zeros(len(x[0])), np.ones(len(x[0])))
+	optimizer = ps.single.GlobalBestPSO(n_particles=PopSize, dimensions=len(x[0]), options=options, bounds=bounds)
 
 	cost, pos = optimizer.optimize(fitness, iters=NGen)
 	if UseDiscrete:
