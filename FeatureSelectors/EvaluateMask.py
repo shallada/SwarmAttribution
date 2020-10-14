@@ -40,7 +40,7 @@ def EvaluateMask(mask, x, y, feature_weight=FeatureWeight):
 		('clf', OneVsRestClassifier(svm.SVC(kernel='rbf', gamma='auto'),n_jobs=-1))
 
 		# Multi-level perceptron (Simple neural net)
-		#('mlp', MLPClassifier(hidden_layer_sizes=(100), max_iter=10000, activation = 'relu', solver='adam'))
+		('mlp', MLPClassifier(hidden_layer_sizes=(100), max_iter=10000, activation = 'relu', solver='adam'))
 	])
 
 	fold_fitness = []
