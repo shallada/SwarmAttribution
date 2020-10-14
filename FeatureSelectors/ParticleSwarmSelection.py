@@ -1,10 +1,12 @@
+import math
 import numpy as np
-import pyswarms as ps
+import random
 import sys
 
 
 from EvaluateMask import EvaluateMask
 from LoadFeatures import LoadFeatures
+
 
 if len(sys.argv) != 4:
 	print("Missing parameters")
@@ -18,57 +20,80 @@ run_no = int(sys.argv[3])
 all_features_file_name = "../Concatenator/"+data_set+"/AllFeatures.txt"
 out_file_name = "output/"+algorithm+"-"+data_set+"-"+str(ones_ratio)+"-"+str(run_no)
 
-NGen = 500
-PopSize = 30
-NParents = 2
-NSplits = 4
+PopSize = 100
+NGen = int(15000/PopSize-1)
 UseDiscrete = True
-NeighborRatio = .3
 FeatureWeight = 0.0
+#SocValue = 1.3
+#CogValue = 2.8
+SocValue = 2.8
+CogValue = 1.3
 
+def convertMask(mask):
+	if UseDiscrete:
+		ret_mask = np.array([0 if _ < 0.5 else 1 for _ in mask])
+	else:
+		ret_mask = mask
+	return ret_mask
 
+class Particle(object):
+	glob_best = None
+	glob_fit = 0.0
 
-def EvaluatePopulation(masks, x, y):
-	fit = []
-	for i in range(len(masks)):
-		fit.append(EvaluateMask(masks[i], x, y, feature_weight = FeatureWeight))
-	return fit
+	@classmethod
+	def getBest(cls):
+		return convertMask(cls.glob_best)
+
+	def __init__(self, mask_size, x, y):
+		self.position = np.array([random.random() for j in range(mask_size)])
+		self.velocity = np.array([(2.0 * random.random() - 1.0) for j in range(mask_size)])
+		self.pbest = self.position
+		self.best_fit = EvaluateMask(convertMask(self.position), x, y, feature_weight = FeatureWeight)
+		if self.best_fit > Particle.glob_fit:
+			Particle.glob_fit = self.best_fit
+			Particle.glob_best = self.pbest
+
+	def update(self, x, y):
+		phi = SocValue + CogValue
+		K = 2/abs(2.0 - phi - math.sqrt(phi**2 - 4.0 * phi))
+		socScale = SocValue * random.random()
+		cogScale = CogValue * random.random()
+		socDelta = self.pbest - self.position
+		cogDelta = Particle.glob_best - self.position
+		self.velocity = K * (self.velocity + (socScale * socDelta) + (cogScale * cogDelta))
+		self.position = self.position + self.velocity
+		fit = EvaluateMask(convertMask(self.position), x, y, feature_weight = FeatureWeight)
+		if fit > self.best_fit:
+			self.pbest = self.position
+			self.best_fit = fit
+			if self.best_fit > Particle.glob_fit:
+				Particle.glob_fit = self.best_fit
+				Particle.glob_best = self.pbest
+
+def CreatePopulation(pop_size, mask_size, x, y):
+	population = []
+	for _ in range(pop_size):
+		population.append(Particle(mask_size, x, y))
+	return population
 
 
 def SwarmMask(x, y):
 
 	# Input: array of shape (pop_size, features)
-	# Output: fitness values of shape (pop_size)
-	def fitness(masks):
-		return EvaluatePopulation(masks, x, y)
+	# Output: accuracy and best mask
 
-	"""
-	if UseDiscrete:
-		neighbors = int(PopSize*NeighborRatio)
-		options = {'c1': 0.5, 'c2': 0.3, 'w':0.9, 'k':neighbors, 'p':2}
-		optimizer = ps.discrete.binary.BinaryPSO(n_particles=PopSize, dimensions=len(x[0]), options=options)
-
-	else:
-		options = {'c1': 0.5, 'c2': 0.3, 'w':0.9}
-		optimizer = ps.single.GlobalBestPSO(n_particles=PopSize, dimensions=len(x[0]), options=options)
-	"""
-
-	options = {'c1': 2.8, 'c2': 1.3, 'w':0.9}
-	bounds = (np.zeros(len(x[0])), np.ones(len(x[0])))
-	optimizer = ps.single.GlobalBestPSO(n_particles=PopSize, dimensions=len(x[0]), options=options, bounds=bounds)
-
-	cost, pos = optimizer.optimize(fitness, iters=NGen)
-	if UseDiscrete:
-		pos = [0 if _ < 0.5 else 1 for _ in pos]
-	return list(pos)
-
+	pop = CreatePopulation(PopSize, len(x[0]), x, y)
+	for _ in range(NGen):
+		for particle in pop:
+			particle.update(x, y)
+	best_mask = Particle.getBest()
+	accuracy = EvaluateMask(best_mask, x, y, feature_weight = 0.0)
+	return accuracy, best_mask
 
 x, y = LoadFeatures(all_features_file_name)
 
 FeatureWeight = ones_ratio
-mask = SwarmMask(x, y)
-
-accuracy = EvaluateMask(mask, x, y, feature_weight=0)
+accuracy, mask = SwarmMask(x, y)
 
 with open(out_file_name, 'w') as out_file:
-	out_file.write(str(accuracy)+","+str(mask)+"\n")
+	out_file.write(str(accuracy)+","+str(mask.tolist())+"\n")

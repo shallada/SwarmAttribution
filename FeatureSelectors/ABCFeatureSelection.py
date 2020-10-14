@@ -23,13 +23,13 @@ out_file_name = "output/"+algorithm+"-"+data_set+"-"+str(ones_ratio)+"-"+str(run
 #
 # Parameters
 #
-ColonySize = 30
-NIters = 500
+ColonySize = 100
+NIters = int(15000/ColonySize)
 MaxTrial = 10
 UseDiscrete = True
 MaskMin = 0.0
 MaskMax = 1.0
-ChangeProb = 0.02 # probability of changing a bit when exploring
+ChangeProb = 0.1 # probability of changing a bit when exploring
 FeatureWeight = 0.0
 
 

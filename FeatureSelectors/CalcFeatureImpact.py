@@ -34,15 +34,18 @@ for algo in ["RandomMask", "ABCFeatureSelection", "GlowwormSwarmOptimization", "
 				if cumulative_mask == None:
 					cumulative_mask = np.zeros([len(mask),])
 				cumulative_mask += mask
-				percent_ones = float(sum(mask))/len(mask)
+				percent_ones = sum(mask)/len(mask)
 				if accuracy > best_acc:
 					best_acc = accuracy
 					best_mask = percent_ones
 				total_accuracy += accuracy
 				total_percent_ones += percent_ones
 		cumulative_mask /= float(NRuns)
-		print(algo+", "+str(ones_ratio)+", "+str(round(100*best_acc, 2))+", "+str(round(100*total_accuracy/NRuns, 2))+", "+str(round(100*best_mask, 2))+", "+str(round(100*total_percent_ones/NRuns, 2)))
-		#print(avg_mask)
+		s = ""
+		for x in cumulative_mask:
+			s += str(x) + ", "
+		print(algo+", "+str(ones_ratio)+", "+s[:-2])
+		#print(s[:-2])
 
 
 

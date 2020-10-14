@@ -24,7 +24,7 @@ out_file_name = "output/"+algorithm+"-"+data_set+"-"+str(ones_ratio)+"-"+str(run
 #
 # Parameters
 #
-NGen = 1400
+NGen = 14900
 PopSize = 100
 MutationRate = .02
 NParents = 2
@@ -52,8 +52,10 @@ def CreatePopulation(pop_size, mask_size):
 		population.append([mask, accuracy])
 	return population
 
-def ChooseParent(population):
-	return random.choice(population)
+def ChooseParent(population, sample_size = 2):
+	parent_set = random.sample(population, sample_size)
+	parent_set.sort(key = lambda x: x[1], reverse=True)
+	return parent_set[0]
 
 def ChooseParents(population, n_parents):
 	parents = []
