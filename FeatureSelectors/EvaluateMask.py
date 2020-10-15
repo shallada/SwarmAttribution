@@ -8,8 +8,6 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, Normalizer, normalize
 
-from CNNKeras import CNNKeras
-
 LATE_PIPE_MERGE = True
 N_LIWC_FEATURES = 93
 N_SA_FEATURES = 176
