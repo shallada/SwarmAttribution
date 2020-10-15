@@ -39,7 +39,7 @@ FeatureWeight = 0.0
 def EvaluatePopulation(population, x, y):
 	for i in range(len(population)):
 		population[i][1] = EvaluateMask(population[i][0], x, y, feature_weight = FeatureWeight)
-		
+
 
 def CreatePopulation(pop_size, mask_size):
 	population = []
@@ -102,7 +102,7 @@ def EvolveMasks(x, y, pop_size=PopSize, n_gen=NGen, mutation_rate=MutationRate, 
 
 		best = population[0][1]
 		mean = CalcMean(population)
-		#print(str(n)+": best = "+str(best)+", mean = "+str(mean)+", worst = "+str(population[-1][1]))
+		print(str(n)+": best = "+str(best)+", mean = "+str(mean)+", worst = "+str(population[-1][1]))
 	return best, population[0][0]
 
 x, y = LoadFeatures(all_features_file_name)

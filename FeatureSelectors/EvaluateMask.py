@@ -10,7 +10,6 @@ from sklearn.preprocessing import StandardScaler, Normalizer, normalize
 
 from CNNKeras import CNNKeras
 
-USE_CNN = True
 LATE_PIPE_MERGE = True
 N_LIWC_FEATURES = 93
 N_SA_FEATURES = 176
@@ -30,32 +29,6 @@ def EvaluateMask(mask, x, y, feature_weight=FeatureWeight):
 	#
 	# Note TF-IDF is not working - probably needs CountVectorizer
 	#
-<<<<<<< HEAD
-	if USE_CNN:
-		n_samples = len(x)
-		n_features = len(x[0])
-		n_outputs = np.amax(y) - np.amin(y) + 1
-		print("n_samples = "+str(n_samples))
-		print("n_features = "+str(n_features))
-		print("n_outputs = "+str(n_outputs))
-		pipeline = CNNKeras(n_features, n_outputs)
-	else:
-		pipeline = Pipeline([
-			#('standardizer', StandardScaler()),
-			#('normalizer', Normalizer()),
-
-			# Choose one of the following:
-
-			# Support Vector Machine
-			#('clf', OneVsRestClassifier(svm.SVC(kernel='linear'),n_jobs=-1))
-
-			# Radial Basis Function
-			#('clf', OneVsRestClassifier(svm.SVC(kernel='rbf', gamma='auto'),n_jobs=-1))
-
-			# Multi-level perceptron (Simple neural net)
-			('mlp', MLPClassifier(hidden_layer_sizes=(100), max_iter=10000, activation = 'relu', solver='adam'))
-		])
-=======
 	pipeline = Pipeline([
 		#('standardizer', StandardScaler()),
 		#('normalizer', Normalizer()),
@@ -66,12 +39,11 @@ def EvaluateMask(mask, x, y, feature_weight=FeatureWeight):
 		#('clf', OneVsRestClassifier(svm.SVC(kernel='linear'),n_jobs=-1))
 
 		# Radial Basis Function
-		('clf', OneVsRestClassifier(svm.SVC(kernel='rbf', gamma='auto'),n_jobs=-1))
+		#('clf', OneVsRestClassifier(svm.SVC(kernel='rbf', gamma='auto'),n_jobs=-1))
 
 		# Multi-level perceptron (Simple neural net)
 		('mlp', MLPClassifier(hidden_layer_sizes=(100), max_iter=10000, activation = 'relu', solver='adam'))
 	])
->>>>>>> 21ad3cef254a18a3e18f4110e459306423888d24
 
 	fold_fitness = []
 	mask_array = np.array(mask)

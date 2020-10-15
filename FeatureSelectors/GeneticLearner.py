@@ -3,7 +3,7 @@ import random
 
 
 POP_SIZE = 100
-N_GEN = 100000
+N_GEN = 10000
 N_PARENTS = 2
 MUTATION_RATE = 0.02
 TOURNAMENT_SIZE = 2
@@ -21,7 +21,8 @@ class GeneticLearner:
         self.sort_pop()
         for n in range(n_gen):
             self.breed(x, y, target)
-            print(self.scores[0])
+            #if (n % 100) == 0:
+            #    print(self.scores[0])
 
     def evaluate_pop(self, x, y, target):
         for i in range(POP_SIZE):
