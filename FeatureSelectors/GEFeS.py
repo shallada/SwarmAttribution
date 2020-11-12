@@ -11,8 +11,8 @@ from LoadFeatures import LoadFeatures
 #
 # Parameters
 #
-NGen = 14900
-PopSize = 100
+NGen = 5
+PopSize = 3
 MutationRate = .02
 NParents = 2
 NSplits = 4
@@ -23,8 +23,9 @@ MaskMax = 1.0
 
 class GEFeS:
 
-	def __init__(self, evaluator):
+	def __init__(self, evaluator, prev_mask=None):
 		self.evaluator = evaluator
+		self.prev_mask = prev_mask
 
 	def EvaluatePopulation(self, population, x, y):
 		for i in range(len(population)):
@@ -35,7 +36,13 @@ class GEFeS:
 		population = []
 		for _ in range(pop_size):
 			if UseDiscrete:
-				mask = np.random.choice([0, 1], size=(mask_size,)).tolist()
+				if self.prev_mask == None:
+					mask = np.random.choice([0, 1], size=(mask_size,)).tolist()
+				else:
+					mask = np.copy(self.prev_mask)
+					for n in range(mask_size):
+						if random.random() < mutation_rate:
+							mask[n] = random.choice([0, 1])
 			else:
 				mask = [random.random() for j in range(mask_size)]
 			accuracy = -1
@@ -82,11 +89,11 @@ class GEFeS:
 			parents = self.ChooseParents(population, n_parents)
 			child_mask = self.UniformCrossover(parents, mutation_rate)
 
-			accuracy = self.evaluator.eval_mask(child_mask, x, y)
+			feature_fitness = self.evaluator.eval_mask(child_mask, x, y)
 			#print('child acc = '+str(accuracy))
 			# if the new child is better than the worst of the population,
-			if accuracy > population[-1][1]:
-				child = [child_mask, accuracy]
+			if feature_fitness > population[-1][1]:
+				child = [child_mask, feature_fitness]
 				population[-1] = child
 				population.sort(key = lambda x: x[1], reverse=True)
 
