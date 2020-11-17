@@ -3,7 +3,7 @@ import numpy as np
 import random
 import sys
 
-
+from sklearn import svm # preload to solve build problem
 
 from CNNKeras import CNNKeras
 from CNNEvaluateMask import EvaluateMask
@@ -51,7 +51,10 @@ class CNNInstance:
 	def eval_mask(self, mask, x, y):
 		cnn_vals = wieghts_to_values(self.weights)
 		n_outputs = np.amax(y) - np.amin(y) + 1
-		cnn = CNNKeras(model_name=cnn_type, n_features=x.shape[1], n_outputs=n_outputs, n_filters=cnn_vals[0].item(), kernel_size=cnn_vals[1].item(), pool_size=cnn_vals[2].item(), dense_size=cnn_vals[3].item())
+		try: # catch bad configurations and respond as though they have bad performance
+			cnn = CNNKeras(model_name=cnn_type, n_features=x.shape[1], n_outputs=n_outputs, n_filters=cnn_vals[0].item(), kernel_size=cnn_vals[1].item(), pool_size=cnn_vals[2].item(), dense_size=cnn_vals[3].item())
+		except:
+			return -1
 		return EvaluateMask(mask, x, y, cnn, feature_weight=feature_weight)
 
 

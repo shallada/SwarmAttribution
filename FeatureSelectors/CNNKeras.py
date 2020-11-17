@@ -9,6 +9,7 @@ from keras.layers import Flatten
 from keras.layers import Input
 from keras.layers.convolutional import Conv1D
 from keras.layers.convolutional import MaxPooling1D
+from keras.layers import Reshape
 from keras.layers.merge import concatenate
 from keras.utils import to_categorical
 from keras.utils import plot_model
