@@ -3,8 +3,8 @@ import random
 import os.path
 from os import path
 
-POP_SIZE = 3
-N_GEN = 3
+POP_SIZE = 100
+N_GEN = 900
 N_PARENTS = 2
 MUTATION_RATE = 0.02
 TOURNAMENT_SIZE = 2

@@ -77,6 +77,7 @@ def Inception(input_shape, n_filters, kernel_size, pool_size, dense_size, n_outp
     #concat = Reshape((concat.shape[1] * concat.shape[2], 1))(concat)
 
     # start inception module 3
+    '''
     conv1 = Conv1D(1, 1, padding='same', activation='relu')(concat)
     conv1 = Conv1D(n_filters, 1, padding='same', activation='relu')(conv1)
 
@@ -91,9 +92,11 @@ def Inception(input_shape, n_filters, kernel_size, pool_size, dense_size, n_outp
 
     concat = concatenate([conv1, conv3, conv5, pool], axis=1)
     concat = Conv1D(1, 1, padding='same', activation='relu')(concat)
-    concat = Reshape((concat.shape[1] * concat.shape[2], 1))(concat)
+    #concat = Reshape((concat.shape[1] * concat.shape[2], 1))(concat)
+    '''
 
     # end inception modules
+    concat = Reshape((concat.shape[1] * concat.shape[2], 1))(concat)
     flat = Flatten()(concat)
     d1 = Dense(dense_size, activation='relu')(flat)
     d2 = Dense(n_outputs, activation='softmax')(d1)
@@ -151,6 +154,8 @@ class CNNKeras:
         self.model = Model(inputs=inp, outputs=d2)
         '''
 
+        self.model_name = model_name
+
         if model_name == 'VGG':
             self.model = VGG(input_shape=(n_features, 1), n_filters=n_filters, kernel_size=kernel_size, pool_size=pool_size, dense_size=dense_size, n_outputs=n_outputs)
         elif model_name == 'INC':
@@ -169,12 +174,21 @@ class CNNKeras:
     def fit(self, x, y):
         x = np.reshape(x, (x.shape[0], x.shape[1], 1))
         y = to_categorical(y)
+        if self.model_name == 'INC':
+            print("start fitting...")
         self.model.fit(x, y, verbose=0, epochs=N_EPOCHS)
+        if self.model_name == 'INC':
+            print("done fitting.")
 
     def score(self, x, y):
         x = np.reshape(x, (x.shape[0], x.shape[1], 1))
         y = to_categorical(y)
+        if self.model_name == 'INC':
+            print("start evaluating...")
         _, accuracy = self.model.evaluate(x, y, verbose=0)
+        if self.model_name == 'INC':
+            print("done evaluating.")
+
         #print("predicting...")
         #print(np.argmax(self.model.predict(x), axis=1))
         #print(np.argmax(y, axis=1))
